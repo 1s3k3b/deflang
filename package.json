@@ -1,0 +1,28 @@
+{
+  "name": "deflang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node ./test/index.js && deflang test/test.def test/test.json && deflang test/test.json test/fromJSON.def"
+  },
+  "bin": {
+    "deflang": "./bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1s3k3b/deflang.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/1s3k3b/deflang/issues"
+  },
+  "homepage": "https://github.com/1s3k3b/deflang#readme",
+  "dependencies": {
+    "eslint": "^6.8.0"
+  }
+}
