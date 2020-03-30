@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require("../src/cli.js")(process.argv.slice(2));
+require("../src/cli/index.js")(process.argv.slice(2));

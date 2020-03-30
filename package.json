@@ -22,7 +22,7 @@
     "url": "https://github.com/1s3k3b/deflang/issues"
   },
   "homepage": "https://github.com/1s3k3b/deflang#readme",
-  "dependencies": {
+  "devDependencies": {
     "eslint": "^6.8.0"
   }
 }

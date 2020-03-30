@@ -1,5 +1,4 @@
 node_modules
 package-lock.json
-.eslintrc.json
 test/*.def
 test/*.json

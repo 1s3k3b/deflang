@@ -1,18 +1,20 @@
 # Deflang
 
 Deflang is a superset of [JSON](https://www.json.org/) which allows customization of tokens.
-Deflang has variables, whitespace is allowed, duplicate tokens aren't allowed.
+Deflang has variables, comments, mathematical and logical operators, whitespace is allowed, duplicate tokens aren't allowed.
 
 ## Example
 
 ```
-:=,;"[]{}
+:=,;"[]{}#
 
-myVariable: "Hello, World!"
+# This is a comment!
+
+myVariable: "Hello, World"
 
 {
-    someNumbers = [ PI, 8 ];
-    someText = [ myVariable ]
+    someNumbers = [ PI, 8 / 2 ];
+    someText = [ myVariable + "!" ]
 }
 ```
 
@@ -20,12 +22,12 @@ compiles to
 
 ```json
 {
-    "someNumbers": [3.141592653589793, 8],
+    "someNumbers": [3.141592653589793, 4],
     "someText": ["Hello, World!"]
 }
 ```
 
-The first 9 characters (`:=,;"[]{}` in the above example) define the tokens. `_DEFAULT_` will be the configuration above, `:=,;"[]{}`.
+The first 9 characters (`:=,;"[]{}#` in the above example) define the tokens. `<default>` will be the configuration above, `:=,;"[]{}#`.
 
 The **first** character defines the operator used to **define variables**. We set it to `:` in the example, so a variable declaration is `name:value`.
 
