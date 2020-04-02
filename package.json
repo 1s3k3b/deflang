@@ -7,7 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node ./test/index.js && deflang test/test.def test/test.json && deflang test/test.json test/fromJSON.def"
+    "api": "node ./test/index.js",
+    "cli": "deflang test/toJSON.def test/toDef.json && deflang test/toDef.json test/fromJSON.def",
+    "test": "npm run api && npm run cli"
   },
   "bin": {
     "deflang": "./bin/index.js"
