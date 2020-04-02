@@ -1,0 +1,9 @@
+<default>
+someVar=8
+[
+    "Hello World!",
+    {
+        a: "b";
+    },
+    someVar / 2 - 1
+]
