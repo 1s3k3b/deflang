@@ -1,4 +1,4 @@
-const { SyntaxError, TypeError } = require('./errors/index.js');
+const { SyntaxError, TypeError, ReferenceError } = require('./errors/index.js');
 const stringify = require('./stringify.js');
 const escape = str => str.replace(/[/.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -124,6 +124,7 @@ const parse = str => {
         }
         if (vars.has(s)) return vars.get(s).value;
         if (/^[\d.-]+$/.test(s)) return Number(s);
+        if (/^\w+$/.test(s)) throw new ReferenceError('NOT_DEFINED', s);
         throw new SyntaxError('UNEXPECTED_TOKEN', s[0]);
     };
 
@@ -133,7 +134,7 @@ const parse = str => {
             '',
         )
         .replace(
-            new RegExp(`^([^${escape(objD)}${escape(defD)}\\s]+)\\s*${escape(objD)}${escape(defD)}(.+)`, 'mg'),
+            new RegExp(`^(\\w+)\\s*${escape(objD)}${escape(defD)}(.+)`, 'mg'),
             (_, n, v) => {
                 if (vars.has(n.trim()) && !vars.get(n.trim()).m) {
                     throw new TypeError('CANNOT_REASSIGN', n.trim());
@@ -143,7 +144,7 @@ const parse = str => {
             },
         )
         .replace(
-            new RegExp(`^([^${escape(defD)}\\s]+)\\s*${escape(defD)}(.+)`, 'mg'),
+            new RegExp(`^(\\w+)\\s*${escape(defD)}(.+)`, 'mg'),
             (_, n, v) => {
                 if (vars.has(n.trim()) && !vars.get(n.trim()).m) {
                     throw new TypeError('CANNOT_REASSIGN', n.trim());

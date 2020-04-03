@@ -93,3 +93,11 @@ myVar
 } catch (e) {
     console.error(e.toString(), '\n');
 }
+try {
+    log(`<default>
+a = "b"
+c
+    `, parse);
+} catch (e) {
+    console.error(e.toString(), '\n');
+}
