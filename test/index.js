@@ -1,5 +1,5 @@
 const { parse, stringify } = require('../src');
-const config = '=:,;"[]{}#|&+-/*^><';
+const config = '=:,;"[]{}#|&+-/*^><!()';
 const log = (x, f, ...xs) => console.log(f(x, ...xs), '\n');
 
 log({
@@ -75,6 +75,17 @@ someVar10 = "x"
 someVar10 = "y"
 # hello
 someVar10
+`, parse);
+log(`<default>
+sqrt(16)
+`, parse);
+log(`<default>
+a = [1, 2, 3, 1, 2, 10]
+sum(a)
+`, parse);
+log(`<default>
+f(x)=x+2
+f(2)
 `, parse);
 try {
     log(`<default>

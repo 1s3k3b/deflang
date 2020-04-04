@@ -1,4 +1,4 @@
-const stringify = (obj, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ] = '=:,;"[]{}#|&+-/*^><!') => {
+const stringify = (obj, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ] = '=:,;"[]{}#|&+-/*^><!()') => {
     const recurse = x => stringify(x, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ]);
     if (['number', 'symbol'].includes(typeof obj)) return `${obj}`;
     if (typeof obj === 'boolean') return obj ? 'True' : 'False';
@@ -7,13 +7,13 @@ const stringify = (obj, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ]
     if (typeof obj === 'object') return `${objO}${Object.entries(obj).map(([ key, val ]) => [ key, recurse(val) ].join(objD)).join(objS)}${objC}`;
 };
 
-module.exports = (obj, def = '=:,;"[]{}#|&+-/*^><!') =>
+module.exports = (obj, def = '=:,;"[]{}#|&+-/*^><!()') =>
     `${
         (
             Array.isArray(def)
                 ? def.join('')
                 : String(def)
         )
-            .slice(0, 20)
-            .replace(/^<default>/, '=:,;"[]{}#|&+-/*^><!')
+            .slice(0, 22)
+            .replace(/^<default>/, '=:,;"[]{}#|&+-/*^><!()')
     }\n${stringify(obj, def)}`;

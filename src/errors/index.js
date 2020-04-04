@@ -3,6 +3,7 @@ const Messages = {
     'DUPLICATE_TOKENS': () => 'No duplicate tokens allowed',
     'CANNOT_REASSIGN': name => 'Cannot reassign variable ' + name,
     'NOT_DEFINED': name => name + ' is not defined',
+    'NOT_FUNCTION': name => name + ' is not a function',
 };
 
 const makeError = BaseError => class DeflangError extends BaseError {
