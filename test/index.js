@@ -1,5 +1,5 @@
 const { parse, stringify } = require('../src');
-const config = '=:,;"[]{}#|&+-/*^><!()';
+const config = '=:,;"[]{}#|&+-/*^><!()%';
 const log = (x, f, ...xs) => console.log(f(x, ...xs), '\n');
 
 log({
@@ -48,7 +48,9 @@ c = 8 / 2
 d = 4 ^ 2
 e = 42 > 2
 f = 4 < 12
-[a, b, c, d, e, f]
+g = 13 % 2
+h = 14 % 2
+[a, b, c, d, e, f, g, h]
 `, parse);
 log(`${config}
 # asd

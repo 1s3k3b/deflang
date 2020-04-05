@@ -4,10 +4,10 @@ const escape = str => str.replace(/[/.*+?^${}()|[\]\\]/g, '\\$&');
 
 const parse = str => {
     str = `${str}`.trim();
-    if (str.startsWith('<default>')) str = '=:,;"[]{}#|&+-/*^><!()' + str.slice(9);
-    const [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ] = str;
-    str = str.slice(22);
-    if (Array.from(new Set([ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, lt, gt, not, fnO, fnC ])).length !== 22) {
+    if (str.startsWith('<default>')) str = '=:,;"[]{}#|&+-/*^><!()%' + str.slice(9);
+    const [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ] = str;
+    str = str.slice(23);
+    if (Array.from(new Set([ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, lt, gt, not, fnO, fnC, mod ])).length !== 23) {
         throw new SyntaxError('DUPLICATE_TOKENS');
     }
 
@@ -44,51 +44,55 @@ const parse = str => {
         const regexes = [
             [
                 new RegExp(`${exprPattern}\\s*${escape(or)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) || _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) || _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(and)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) && _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) && _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(sum)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) + _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) + _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(sub)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) - _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) - _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(mult)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) * _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) * _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(div)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) / _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) / _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+            ],
+            [
+                new RegExp(`${exprPattern}\\s*${escape(mod)}\\s*${exprPattern}`, 'g'),
+                (_, a, b) => stringify(_parse(a) % _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(pow)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) ** _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) ** _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(gt)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) > _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) > _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(lt)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) < _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) < _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             /* [
                 new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) == _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) == _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) === _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a, b) => stringify(_parse(a) === _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ], */
             [
                 new RegExp(`${escape(not)}\\s*${exprPattern}`, 'g'),
-                (_, a) => stringify(!_parse(a), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23),
+                (_, a) => stringify(!_parse(a), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
                 new RegExp(`(\\w+)${escape('(')}(${exprPattern})${escape(')')}`),
@@ -99,7 +103,7 @@ const parse = str => {
                     if (typeof vars.get(a).value !== 'function') {
                         throw new TypeError('NOT_FUNCTION', a);
                     }
-                    return stringify(vars.get(a).value(_parse(b)), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ]).slice(23);
+                    return stringify(vars.get(a).value(_parse(b)), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24);
                 },
             ],
         ];
