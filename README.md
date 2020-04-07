@@ -6,46 +6,29 @@ Deflang has variables, comments, mathematical and logical operators, whitespace 
 ## Example
 
 ```
-:=,;"[]{}#
+<default>
+numbers = range(1, 10)
+evenNumbers = filter(numbers, isEven)
+oddNumbers = filter(numbers, isOdd)
 
-# This is a comment!
+evenCount = length(evenNumbers)
+oddCount = length(oddNumbers)
 
-myVariable: "Hello, World"
+firstEven = first(evenNumbers)
+lastEven = last(evenNumbers)
 
-{
-    someNumbers = [ PI, 8 / 2 ];
-    someText = [ myVariable + "!" ]
-}
+firstOdd = first(oddNumbers)
+lastOdd = last(oddNumbers)
+
+arr = ["There are ", evenCount, " even numbers and ", oddCount, " odd numbers from 1 to 10. The first and last even numbers are ", firstEven, " and ", lastEven, ". The first and last odd numbers are ", firstOdd, " and ", lastOdd, "."]
+[ sum(arr), evenNumbers, oddNumbers ]
 ```
 
 compiles to
 
 ```json
-{
-    "someNumbers": [3.141592653589793, 4],
-    "someText": ["Hello, World!"]
-}
+["There are 5 even numbers and 5 odd numbers from 1 to 10. The first and last even numbers are 2 and 10. The first and last odd numbers are 1 and 9.",[2,4,6,8,10],[1,3,5,7,9]]
 ```
-
-The first 9 characters (`:=,;"[]{}#` in the above example) define the tokens. `<default>` will be the configuration above, `:=,;"[]{}#`.
-
-The **first** character defines the operator used to **define variables**. We set it to `:` in the example, so a variable declaration is `name:value`.
-
-The **second** character defines the operator used to **seperate object keys and values**. We set it to `=` in the example, so an object key-value pair is `name=value`.
-
-The **third** character defines the operator used to **seperate array elements**. We set it to `,` in the example, so 2 array elements seperated is `value,value`.
-
-The **fourth** character defines the operator used to **seperate object key-value pairs**. We set it to `;` in the example, so 2 key-value pairs is `name=value;name=value`.
-
-The **fifth** character defines the operator used to **open and close strings**. We set it to `"` in the example, so a string is `"text"`.
-
-The **sixth** character defines the operator used to **open arrays**. We set it to `[` in the example, so an array beginning is `[value`.
-
-The **seventh** character defines the operator used to **close arrays**. We set it to `]` in the example, so an array ending is `value]`.
-
-The **eighth** character defines the operator used to **open objects**. We set it to `{` in the example, so an object beginning is `{name=value`.
-
-The **nineth** character defines the operator used to **close objects**. We set it to `}` in the example, so an object ending is `name=value}`.
 
 # Repository
 
@@ -60,7 +43,7 @@ Exported methods:
 
 - `parse(str: string): string | number | boolean | object | Array<T>` - parses a string
 
-- `stringify(obj: string | number | boolean | object | Array<T>, config?: string = ':=,;"[]{}'): string` - converts a JS structure to Deflang
+- `stringify(obj: string | number | boolean | object | Array<T>, config?: string = '<default>'): string` - converts a JS structure to Deflang
 
 ## CLI
 
@@ -70,3 +53,7 @@ deflang `<from>.json` `<to>.def` - Converts a `.json` file to a `.def` file
 
 
 ! Both arguments must end in either `.def` or `.json` for the CLI to work
+
+# Built-in variables and methods
+
+`True`, `False`, `NaN`, `Null`, `Undefined` - `true`, `false`, `NaN`, `null`, `undefined` in JavaScript

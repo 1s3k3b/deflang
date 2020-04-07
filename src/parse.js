@@ -1,6 +1,6 @@
 const { SyntaxError, TypeError, ReferenceError } = require('./errors/index.js');
 const stringify = require('./stringify.js');
-const escape = str => str.replace(/[/.*+?^${}()|[\]\\]/g, '\\$&');
+const { escape, resolveArray, resolveFn } = require('./util/index.js');
 
 const parse = str => {
     str = `${str}`.trim();
@@ -30,10 +30,94 @@ const parse = str => {
         ['SQRT2', { value: Math.SQRT2, m: true }],
         // functions
         ['sqrt', { value: Math.sqrt, m: false }],
-        ['sum', { value: args => args.flat(Infinity).reduce((a, b) => a + b), m: false }],
+        ['sum', { value: (...args) => args.flat(Infinity).reduce((a, b) => a + b), m: false }],
         ['str', { value: x => `${x}`, m: false }],
         ['num', { value: x => +x, m: false }],
         ['int', { value: x => parseInt(x) || 0, m: false }],
+        [
+            'range',
+            {
+                value: (min, max) => {
+                    let isString = 0;
+                    if (!max) {
+                        max = min;
+                        min = 0;
+                    }
+                    if (typeof min === 'string') {
+                        min = min.charCodeAt(0);
+                        isString++;
+                    }
+                    if (typeof max === 'string') {
+                        max = max.charCodeAt(0);
+                        isString++;
+                    }
+                    min = +min;
+                    max = +max;
+                    min = Math.min(min, max);
+                    max = Math.max(min, max);
+                    return Array
+                        .from({ length: max - min + 1 }, (_, i) => i + min)
+                        .map(n => isString === 2 ? String.fromCharCode(n) : n);
+                },
+                m: false,
+            },
+        ],
+        ['print', { value: console.log, m: false }],
+        [
+            'map',
+            {
+                value: (a, fn) => {
+                    const res = resolveArray(a).map(resolveFn(fn));
+                    return typeof a === 'string' ? res.join('') : res;
+                },
+                m: false,
+            },
+        ],
+        [
+            'filter',
+            {
+                value: (a, fn) => {
+                    const res = resolveArray(a).filter(resolveFn(fn));
+                    return typeof a === 'string' ? res.join('') : res;
+                },
+                m: false,
+            },
+        ],
+        [
+            'sort',
+            {
+                value: x => resolveArray(x).sort(),
+                m: false,
+            },
+        ],
+        [
+            'length',
+            {
+                value: x => {
+                    if (typeof x === 'string' || Array.isArray(x)) return x.length;
+                    if (typeof x === 'number') return x;
+                    if (typeof x === 'object') return Object.keys(x).length;
+                    return 0;
+                },
+                m: false,
+            },
+        ],
+        [
+            'first',
+            {
+                value: (arr, i = 0) => resolveArray(arr)[i],
+                m: false,
+            },
+        ],
+        [
+            'last',
+            {
+                value: (arr, i = 0) => resolveArray(arr)[resolveArray(arr).length - i - 1],
+                m: false,
+            },
+        ],
+        ['isEven', { value: x => !(x % 2), m: false }],
+        ['isOdd', { value: x => !!(x % 2), m: false }],
     ]);
 
     const _parse = s => {
@@ -42,6 +126,29 @@ const parse = str => {
             .trim()
             .replace(/\n/g, '');
         const regexes = [
+            [
+                new RegExp(`(\\w+)${escape(fnO)}((${exprPattern},?\\s*)+)${escape(fnC)}`),
+                (_, a, b) => {
+                    if (!vars.has(a)) {
+                        throw new ReferenceError('NOT_DEFINED', a);
+                    }
+                    if (typeof vars.get(a).value !== 'function') {
+                        throw new TypeError('NOT_FUNCTION', a);
+                    }
+                    return stringify(
+                        vars
+                            .get(a)
+                            .value(
+                                ...b.split(/,\s*/g).map(_parse),
+                            ),
+                        [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ],
+                    ).slice(24);
+                },
+            ],
+            [
+                new RegExp(`${escape(fnO)}(${exprPattern})${escape(fnC)}`),
+                (_, e) => stringify(_parse(e), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+            ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(or)}\\s*${exprPattern}`, 'g'),
                 (_, a, b) => stringify(_parse(a) || _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
@@ -82,29 +189,17 @@ const parse = str => {
                 new RegExp(`${exprPattern}\\s*${escape(lt)}\\s*${exprPattern}`, 'g'),
                 (_, a, b) => stringify(_parse(a) < _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
-            /* [
+            [
+                new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
+                (_, a, b) => stringify(_parse(a) === _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+            ],
+            [
                 new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
                 (_, a, b) => stringify(_parse(a) == _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
             ],
             [
-                new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) === _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
-            ], */
-            [
                 new RegExp(`${escape(not)}\\s*${exprPattern}`, 'g'),
                 (_, a) => stringify(!_parse(a), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
-            ],
-            [
-                new RegExp(`(\\w+)${escape('(')}(${exprPattern})${escape(')')}`),
-                (_, a, b) => {
-                    if (!vars.has(a)) {
-                        throw new ReferenceError('NOT_DEFINED', a);
-                    }
-                    if (typeof vars.get(a).value !== 'function') {
-                        throw new TypeError('NOT_FUNCTION', a);
-                    }
-                    return stringify(vars.get(a).value(_parse(b)), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24);
-                },
             ],
         ];
         let _found = regexes.find(r => r[0].test(s));
@@ -158,13 +253,25 @@ const parse = str => {
             '',
         )
         .replace(
-            new RegExp(`^(\\w+)${escape('(')}(\\w+)${escape(')')}\\s*${escape(defD)}(.+)`, 'mg'),
+            new RegExp(`^(\\w+)${escape(fnO)}((?:\\w+,?\\s*)+)${escape(fnC)}\\s*${escape(defD)}(.+)`, 'mg'),
             (_, n, a, b) => {
                 if (vars.has(n)) {
                     throw new TypeError('CANNOT_REASSIGN', n);
                 }
                 vars.set(n, {
-                    value: arg => _parse(b.replace(a, arg)),
+                    value: (...args) => {
+                        let i = 0;
+                        for (const arg of a.split(/,\s*/g)) {
+                            b = b.replace(
+                                new RegExp(escape(arg), 'g'),
+                                stringify(
+                                    args[i++],
+                                    [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ],
+                                ).slice(24),
+                            );
+                        }
+                        return _parse(b);
+                    },
                     m: false,
                 });
                 return '';

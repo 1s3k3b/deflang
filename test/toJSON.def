@@ -1,9 +1,16 @@
 <default>
-someVar=8
-[
-    "Hello World!",
-    {
-        a: "b";
-    },
-    someVar / 2 - 1
-]
+numbers = range(1, 10)
+evenNumbers = filter(numbers, isEven)
+oddNumbers = filter(numbers, isOdd)
+
+evenCount = length(evenNumbers)
+oddCount = length(oddNumbers)
+
+firstEven = first(evenNumbers)
+lastEven = last(evenNumbers)
+
+firstOdd = first(oddNumbers)
+lastOdd = last(oddNumbers)
+
+arr = ["There are ", evenCount, " even numbers and ", oddCount, " odd numbers from 1 to 10. The first and last even numbers are ", firstEven, " and ", lastEven, ". The first and last odd numbers are ", firstOdd, " and ", lastOdd, "."]
+[ sum(arr), evenNumbers, oddNumbers ]

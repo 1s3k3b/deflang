@@ -4,6 +4,7 @@ const Messages = {
     'CANNOT_REASSIGN': name => 'Cannot reassign variable ' + name,
     'NOT_DEFINED': name => name + ' is not defined',
     'NOT_FUNCTION': name => name + ' is not a function',
+    'CANNOT_RESOLVE': (x, struct) => 'Cannot resolve ' + x + ' to ' + struct,
 };
 
 const makeError = BaseError => class DeflangError extends BaseError {

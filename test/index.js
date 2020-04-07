@@ -87,7 +87,16 @@ sum(a)
 `, parse);
 log(`<default>
 f(x)=x+2
-f(2)
+g(x, y)=x+y
+fn = f(2)
+gn = g(2, 2)
+[ fn, gn ]
+`, parse); 
+log(`<default>
+numbers = range(1, 10)
+evenNumbers = filter(numbers, isEven)
+oddNumbers = filter(numbers, isOdd)
+[evenNumbers, oddNumbers]
 `, parse);
 try {
     log(`<default>
