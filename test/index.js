@@ -91,12 +91,18 @@ g(x, y)=x+y
 fn = f(2)
 gn = g(2, 2)
 [ fn, gn ]
-`, parse); 
+`, parse);
 log(`<default>
 numbers = range(1, 10)
 evenNumbers = filter(numbers, isEven)
 oddNumbers = filter(numbers, isOdd)
 [evenNumbers, oddNumbers]
+`, parse);
+log(`${config}
+myArr = ["a", "b", "c", "d", "e", "f", "g"]
+randomEl = random(myArr)
+randomN = random(10, 20)
+[ randomEl, randomN ]
 `, parse);
 try {
     log(`<default>

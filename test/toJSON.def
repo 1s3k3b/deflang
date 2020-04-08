@@ -12,5 +12,5 @@ lastEven = last(evenNumbers)
 firstOdd = first(oddNumbers)
 lastOdd = last(oddNumbers)
 
-arr = ["There are ", evenCount, " even numbers and ", oddCount, " odd numbers from 1 to 10. The first and last even numbers are ", firstEven, " and ", lastEven, ". The first and last odd numbers are ", firstOdd, " and ", lastOdd, "."]
-[ sum(arr), evenNumbers, oddNumbers ]
+strings = ["There are ", evenCount, " even numbers and ", oddCount, " odd numbers from 1 to 10. The first and last even numbers are ", firstEven, " and ", lastEven, ". The first and last odd numbers are ", firstOdd, " and ", lastOdd, "."]
+[ sum(strings), evenNumbers, oddNumbers ]

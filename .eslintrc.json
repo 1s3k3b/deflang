@@ -8,7 +8,6 @@
 		"ecmaVersion": 2019
 	},
 	"rules": {
-		"brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
 		"comma-dangle": ["error", "always-multiline"],
 		"comma-spacing": "error",
 		"comma-style": "error",

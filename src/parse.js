@@ -34,6 +34,7 @@ const parse = str => {
         ['str', { value: x => `${x}`, m: false }],
         ['num', { value: x => +x, m: false }],
         ['int', { value: x => parseInt(x) || 0, m: false }],
+        ['arr', { value: resolveArray, m: false }],
         [
             'range',
             {
@@ -118,6 +119,23 @@ const parse = str => {
         ],
         ['isEven', { value: x => !(x % 2), m: false }],
         ['isOdd', { value: x => !!(x % 2), m: false }],
+        [
+            'random',
+            {
+                value: (x, max) => {
+                    try {
+                        const arr = resolveArray(x, false);
+                        return arr[Math.floor(Math.random() * arr.length)];
+                    } catch {} // eslint-disable-line no-empty
+                    x = +x;
+                    max = +max;
+                    x = Math.min(x, max);
+                    max = Math.max(x, max);
+                    return Math.floor(Math.random() * (max - x)) + x;
+                },
+                m: false,
+            },
+        ],
     ]);
 
     const _parse = s => {
