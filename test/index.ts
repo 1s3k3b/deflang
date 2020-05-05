@@ -1,6 +1,8 @@
-const { parse, stringify } = require('../src');
+import main from '../src';
+
+const { parse, stringify } = main;
 const config = '=:,;"[]{}#|&+-/*^><!()%';
-const log = (x, f, ...xs) => console.log(f(x, ...xs), '\n');
+const log = (x: any, f: Function, ...xs: any[]) => console.log(f(x, ...xs), '\n');
 
 log({
     a: 'b',

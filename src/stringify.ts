@@ -1,5 +1,5 @@
-const stringify = (obj, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ] = '=:,;"[]{}#|&+-/*^><!()%') => {
-    const recurse = x => stringify(x, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ]);
+const stringify = (obj: any, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ] = '=:,;"[]{}#|&+-/*^><!()%'): string => {
+    const recurse = (x: any): string => stringify(x, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ].join(''));
     if (obj === null) return 'Null';
     if (obj === undefined) return 'Undefined';
     if (isNaN(obj) && typeof obj === 'number') return 'NaN';
@@ -11,7 +11,7 @@ const stringify = (obj, [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC ]
     return 'Undefined';
 };
 
-module.exports = (obj, def = '=:,;"[]{}#|&+-/*^><!()%') =>
+export default (obj: any, def = '=:,;"[]{}#|&+-/*^><!()%'): string =>
     `${
         (
             Array.isArray(def)
@@ -19,5 +19,5 @@ module.exports = (obj, def = '=:,;"[]{}#|&+-/*^><!()%') =>
                 : String(def)
         )
             .slice(0, 23)
-            .replace(/^<default>/, '=:,;"[]{}#|&+-/*^><!()%')
+            .replace(/^<default>$/, '=:,;"[]{}#|&+-/*^><!()%')
     }\n${stringify(obj, def)}`;

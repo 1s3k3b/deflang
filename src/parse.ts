@@ -1,8 +1,10 @@
-const { SyntaxError, TypeError, ReferenceError } = require('./errors/index.js');
-const stringify = require('./stringify.js');
-const { escape, resolveArray, resolveFn } = require('./util/index.js');
+import Errors from './errors/';
+import stringify from './stringify';
+import { escape, resolveArray, resolveFn } from './util/';
 
-const parse = str => {
+const { SyntaxError, TypeError, ReferenceError } = Errors;
+
+const parse = (str: string) => {
     str = `${str}`.trim();
     if (str.startsWith('<default>')) str = '=:,;"[]{}#|&+-/*^><!()%' + str.slice(9);
     const [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ] = str;
@@ -11,7 +13,10 @@ const parse = str => {
         throw new SyntaxError('DUPLICATE_TOKENS');
     }
 
-    const vars = new Map([
+    const vars: Map<string, {
+        value: any;
+        m: boolean;
+    }> = new Map([
         // booleans
         ['True', { value: true, m: false }],
         ['False', { value: false, m: false }],
@@ -33,12 +38,12 @@ const parse = str => {
         ['sum', { value: (...args) => args.flat(Infinity).reduce((a, b) => a + b), m: false }],
         ['str', { value: x => `${x}`, m: false }],
         ['num', { value: x => +x, m: false }],
-        ['int', { value: x => parseInt(x) || 0, m: false }],
+        ['int', { value: (x: any) => parseInt(x as string) || 0, m: false }],
         ['arr', { value: resolveArray, m: false }],
         [
             'range',
             {
-                value: (min, max) => {
+                value: (min: any, max: any) => {
                     let isString = 0;
                     if (!max) {
                         max = min;
@@ -67,8 +72,8 @@ const parse = str => {
         [
             'map',
             {
-                value: (a, fn) => {
-                    const res = resolveArray(a).map(resolveFn(fn));
+                value: (a: any, fn: any) => {
+                    const res = resolveArray(a).map(resolveFn(fn as string | Function) as (value: any, index: number, array: any[]) => any[]);
                     return typeof a === 'string' ? res.join('') : res;
                 },
                 m: false,
@@ -77,8 +82,8 @@ const parse = str => {
         [
             'filter',
             {
-                value: (a, fn) => {
-                    const res = resolveArray(a).filter(resolveFn(fn));
+                value: (a: any, fn: any) => {
+                    const res = resolveArray(a).filter(resolveFn(fn) as (value: any, index: number, array: any[]) => any[]);
                     return typeof a === 'string' ? res.join('') : res;
                 },
                 m: false,
@@ -122,7 +127,7 @@ const parse = str => {
         [
             'random',
             {
-                value: (x, max) => {
+                value: (x: any, max: any) => {
                     try {
                         const arr = resolveArray(x, false);
                         return arr[Math.floor(Math.random() * arr.length)];
@@ -138,86 +143,86 @@ const parse = str => {
         ],
     ]);
 
-    const _parse = s => {
+    const _parse = (s: string): any => {
         const exprPattern = `(${escape(strD)}.+${escape(strD)}|[\\w\\d${[ defD, objD, arrS, objS, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC ].map(x => `\\${x}`).join('')}]+)`;
         s = s
             .trim()
             .replace(/\n/g, '');
-        const regexes = [
+        const regexes: ([RegExp, (...args: any[]) => any])[] = [
             [
                 new RegExp(`(\\w+)${escape(fnO)}((${exprPattern},?\\s*)+)${escape(fnC)}`),
                 (_, a, b) => {
                     if (!vars.has(a)) {
                         throw new ReferenceError('NOT_DEFINED', a);
                     }
-                    if (typeof vars.get(a).value !== 'function') {
+                    if (typeof vars.get(a)!.value !== 'function') {
                         throw new TypeError('NOT_FUNCTION', a);
                     }
                     return stringify(
                         vars
-                            .get(a)
+                            .get(a)!
                             .value(
                                 ...b.split(/,\s*/g).map(_parse),
                             ),
-                        [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ],
+                        [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join(''),
                     ).slice(24);
                 },
             ],
             [
                 new RegExp(`${escape(fnO)}(${exprPattern})${escape(fnC)}`),
-                (_, e) => stringify(_parse(e), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, e) => stringify(_parse(e), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(or)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) || _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) || _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(and)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) && _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) && _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(sum)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) + _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) + _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(sub)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) - _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) - _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(mult)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) * _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) * _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(div)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) / _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) / _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(mod)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) % _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) % _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(pow)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) ** _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) ** _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(gt)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) > _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) > _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(lt)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) < _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) < _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) === _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) === _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${exprPattern}\\s*${escape(defD)}${escape(defD)}\\s*${exprPattern}`, 'g'),
-                (_, a, b) => stringify(_parse(a) == _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a, b) => stringify(_parse(a) == _parse(b), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
             [
                 new RegExp(`${escape(not)}\\s*${exprPattern}`, 'g'),
-                (_, a) => stringify(!_parse(a), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ]).slice(24),
+                (_, a) => stringify(!_parse(a), [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join('')).slice(24),
             ],
         ];
         let _found = regexes.find(r => r[0].test(s));
@@ -240,7 +245,7 @@ const parse = str => {
             return s
                 .slice(1, -1)
                 .split(new RegExp(`\\s*${escape(arrS)}\\s*`))
-                .filter(x => x)
+                .filter((x: any) => x)
                 .map(_parse);
         }
         if (s.startsWith(objO) && s.endsWith(objC)) {
@@ -248,8 +253,8 @@ const parse = str => {
                 s
                     .slice(1, -1)
                     .split(new RegExp(`\\s*${escape(objS)}\\s*`))
-                    .filter(x => x)
-                    .map(se =>
+                    .filter((x: any) => x)
+                    .map((se: string) =>
                         [
                             se.split(new RegExp(`\\s*${escape(objD)}\\s*`))[0].trim(),
                             _parse(se.split(new RegExp(`\\s*${escape(objD)}\\s*`))[1]),
@@ -257,7 +262,7 @@ const parse = str => {
                     ),
             );
         }
-        if (vars.has(s)) return vars.get(s).value;
+        if (vars.has(s)) return vars.get(s)!.value;
         if (/^[\d.-]+$/.test(s)) return Number(s);
         if (/^\w+$/.test(s)) {
             throw new ReferenceError('NOT_DEFINED', s);
@@ -277,14 +282,14 @@ const parse = str => {
                     throw new TypeError('CANNOT_REASSIGN', n);
                 }
                 vars.set(n, {
-                    value: (...args) => {
+                    value: (...args: any[]) => {
                         let i = 0;
                         for (const arg of a.split(/,\s*/g)) {
                             b = b.replace(
                                 new RegExp(escape(arg), 'g'),
                                 stringify(
                                     args[i++],
-                                    [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ],
+                                    [ defD, objD, arrS, objS, strD, arrO, arrC, objO, objC, com, or, and, sum, sub, div, mult, pow, gt, lt, not, fnO, fnC, mod ].join(''),
                                 ).slice(24),
                             );
                         }
@@ -298,7 +303,7 @@ const parse = str => {
         .replace(
             new RegExp(`^(\\w+)\\s*${escape(objD)}${escape(defD)}(.+)`, 'mg'),
             (_, n, v) => {
-                if (vars.has(n.trim()) && !vars.get(n.trim()).m) {
+                if (vars.has(n.trim()) && !vars.get(n.trim())!.m) {
                     throw new TypeError('CANNOT_REASSIGN', n.trim());
                 }
                 vars.set(n.trim(), { value: _parse(v.trim()), m: false });
@@ -308,7 +313,7 @@ const parse = str => {
         .replace(
             new RegExp(`^(\\w+)\\s*${escape(defD)}(.+)`, 'mg'),
             (_, n, v) => {
-                if (vars.has(n.trim()) && !vars.get(n.trim()).m) {
+                if (vars.has(n.trim()) && !vars.get(n.trim())!.m) {
                     throw new TypeError('CANNOT_REASSIGN', n.trim());
                 }
                 vars.set(n.trim(), { value: _parse(v.trim()), m: true });
@@ -318,4 +323,4 @@ const parse = str => {
     return _parse(str);
 };
 
-module.exports = parse;
+export default parse;

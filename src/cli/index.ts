@@ -1,7 +1,9 @@
 const { writeFileSync, readFileSync } = require('fs');
-const { toJSON, fromJSON } = require('../index.js');
+import main from '../';
 
-module.exports = args => {
+const { fromJSON, toJSON } = main;
+
+export default (args: string[]) => {
     if (`${args[0]}`.endsWith('.def') && `${args[1]}`.endsWith('.json')) {
         writeFileSync(
             args[1],
@@ -16,8 +18,7 @@ module.exports = args => {
         writeFileSync(
             args[1],
             fromJSON(
-                readFileSync(args[0])
-                    .toString(),
+                readFileSync(args[0], 'utf8')
             ),
         );
         return console.log(`Successfully transpiled ${args[0]} into ${args[1]}`);

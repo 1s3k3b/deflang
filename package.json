@@ -7,12 +7,12 @@
     "test": "test"
   },
   "scripts": {
-    "api": "node ./test/index.js",
+    "api": "node ./dist/test/index.js",
     "cli": "deflang test/toJSON.def test/toDef.json && deflang test/toDef.json test/fromJSON.def",
     "test": "npm run api && npm run cli"
   },
   "bin": {
-    "deflang": "./bin/index.js"
+    "deflang": "./dist/bin/index.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,9 @@
   },
   "homepage": "https://github.com/1s3k3b/deflang#readme",
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "@types/node": "^13.13.4",
+    "tslint": "^6.1.2",
+    "tslint-eslint-rules": "^5.4.0",
+    "typescript": "^3.8.3"
   }
 }

@@ -1,4 +1,4 @@
-const Messages = {
+const Messages: { [key: string]: (...args: string[]) => string } = {
     'UNEXPECTED_TOKEN': token => 'Unexpected token ' + token + ' in Deflang',
     'DUPLICATE_TOKENS': () => 'No duplicate tokens allowed',
     'CANNOT_REASSIGN': name => 'Cannot reassign variable ' + name,
@@ -7,13 +7,16 @@ const Messages = {
     'CANNOT_RESOLVE': (x, struct) => 'Cannot resolve ' + x + ' to ' + struct,
 };
 
-const makeError = BaseError => class DeflangError extends BaseError {
-    constructor(type, ...keys) {
-        super(Messages[type](...keys));
+function makeError(BaseError: typeof Error) {
+    class DeflangError extends BaseError {
+        constructor(type: string, ...keys: any[]) {
+            super(Messages[type](...keys));
+        }
     }
+    return DeflangError;
 };
 
-module.exports = {
+export default {
     SyntaxError: makeError(SyntaxError),
     TypeError: makeError(TypeError),
     ReferenceError: makeError(ReferenceError),

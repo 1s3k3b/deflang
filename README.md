@@ -3,6 +3,8 @@
 Deflang is a superset of [JSON](https://www.json.org/) which allows customization of tokens.
 Deflang has variables, comments, mathematical and logical operators, whitespace is allowed, duplicate tokens aren't allowed.
 
+This is not a proper language. I don't think I'll finish proper documentation in this README.
+
 ## Example
 
 ```
@@ -35,7 +37,8 @@ compiles to
 To install the CLI from this repository
 - `git clone https://github.com/1s3k3b/deflang.git` (or download the repo as a .zip)
 - `cd deflang`
-- `npm install . -g`
+- `npm i`
+- `npm i . -g`
 
 ## JS interface
 
