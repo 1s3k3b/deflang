@@ -1,11 +1,9 @@
 {
   "name": "deflang",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "description": "A superset of JSON which allows customization of tokens",
+  "main": "./dist/src/index.js",
+  "files": ["test", "src"],
   "scripts": {
     "api": "node ./dist/test/index.js",
     "cli": "deflang test/toJSON.def test/toDef.json && deflang test/toDef.json test/fromJSON.def",
@@ -18,8 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/1s3k3b/deflang.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "1s3k3b",
   "bugs": {
     "url": "https://github.com/1s3k3b/deflang/issues"
   },
